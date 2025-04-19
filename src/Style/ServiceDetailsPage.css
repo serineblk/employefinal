@@ -278,89 +278,228 @@
 .add-dish-button {
   background-color: #4CAF50;
   color: white;
-  padding: 10px 20px;
+  padding: 12px 24px;
   border: none;
-  border-radius: 5px;
+  border-radius: 8px;
   cursor: pointer;
   margin-bottom: 20px;
+  font-size: 16px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
 
 .add-dish-button:hover {
-  background-color: #45a049;
+  background-color: #3e8e41;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.15);
 }
 
 /* Styles pour le formulaire d'ajout de plat */
 .add-dish-form {
-  background-color: #f9f9f9;
-  padding: 20px;
-  border-radius: 10px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  background-color: white;
+  padding: 25px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  margin-bottom: 25px;
+  max-width: 500px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.add-dish-form h2 {
+  color: #2c3e50;
+  margin-top: 0;
   margin-bottom: 20px;
+  text-align: center;
+  font-size: 24px;
 }
 
 .add-dish-form input {
   width: 100%;
-  padding: 10px;
+  padding: 12px 15px;
   margin: 10px 0;
-  border: 1px solid #ccc;
-  border-radius: 5px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 16px;
+  transition: border 0.3s ease;
+  box-sizing: border-box;
+}
+
+.add-dish-form input:focus {
+  border-color: #4CAF50;
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
+}
+
+.add-dish-form .form-group {
+  margin-bottom: 15px;
+}
+
+.add-dish-form label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500;
+  color: #555;
+}
+
+.add-dish-form .button-group {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 20px;
+  gap: 15px;
 }
 
 .add-dish-form button {
   background-color: #4CAF50;
   color: white;
-  padding: 10px 20px;
+  padding: 12px 24px;
   border: none;
-  border-radius: 5px;
+  border-radius: 8px;
   cursor: pointer;
-  margin-right: 20px;
+  font-size: 16px;
+  font-weight: 600;
+  transition: all 0.3s ease;
 }
 
 .add-dish-form button:hover {
-  background-color: #45a049;
+  background-color: #3e8e41;
+  transform: translateY(-1px);
+}
+
+.add-dish-form button.cancel {
+  background-color: #f44336;
+}
+
+.add-dish-form button.cancel:hover {
+  background-color: #d32f2f;
 }
 /* Styles pour les cartes de service spa */
+/* Conteneur principal avec centrage amélioré */
+.spa-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 30px;
+  padding: 30px;
+  min-height: 100vh; /* Prend toute la hauteur de l'écran */
+  box-sizing: border-box;
+  margin: 0 auto;
+  background-color: #f8f9fa; /* Fond légèrement gris pour mieux voir */
+}
+
+/* Styles des cartes avec centrage parfait */
 .spa-card {
   background-color: white;
-  border-radius: 15px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  border-radius: 16px;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
   overflow: hidden;
-  transition: transform 0.2s, box-shadow 0.2s;
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
   cursor: pointer;
-  width: 300px;
-  margin: 10px;
+  width: 320px;
   text-align: center;
-  padding: 20px;
+  padding: 0 0 25px 0;
+  position: relative;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  margin: 10px; /* Marge supplémentaire */
+}
+
+/* Pour exactement 3 cartes centrées */
+@media (min-width: 1100px) {
+  .spa-container {
+    max-width: 1100px; /* 3 cartes * 320px + 2 gaps * 30px */
+  }
 }
 
 .spa-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+  transform: translateY(-8px);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
 }
 
 .spa-card img {
   width: 100%;
-  height: 200px;
+  height: 220px;
   object-fit: cover;
-  border-bottom: 3px solid #6c5ce7;
+  border-bottom: 4px solid #6c5ce7;
+  transition: transform 0.3s ease;
+}
+
+.spa-card:hover img {
+  transform: scale(1.03);
+}
+
+.spa-card .card-content {
+  padding: 20px;
 }
 
 .spa-card h3 {
-  font-size: 22px;
-  margin: 15px 0 10px;
-  color: #333;
+  font-size: 24px;
+  margin: 15px 0 12px;
+  color: #2d3436;
+  font-weight: 600;
+  position: relative;
+  display: inline-block;
+}
+
+.spa-card h3:after {
+  content: '';
+  position: absolute;
+  width: 50px;
+  height: 3px;
+  background: #6c5ce7;
+  bottom: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-radius: 3px;
 }
 
 .spa-card p {
   font-size: 16px;
-  margin: 5px 10px;
-  color: #555;
+  line-height: 1.6;
+  margin: 15px 0;
+  color: #636e72;
 }
 
 .spa-card .icon {
-  font-size: 40px;
+  font-size: 48px;
   color: #6c5ce7;
-  margin-bottom: 10px;
+  margin: 20px 0 15px;
+  transition: transform 0.3s ease;
+}
+
+.spa-card:hover .icon {
+  transform: scale(1.1);
+}
+
+.spa-card .badge {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  background: #6c5ce7;
+  color: white;
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.spa-card .card-button {
+  display: inline-block;
+  background: #6c5ce7;
+  color: white;
+  padding: 10px 25px;
+  border-radius: 30px;
+  text-decoration: none;
+  margin-top: 10px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  border: 2px solid #6c5ce7;
+}
+
+.spa-card .card-button:hover {
+  background: transparent;
+  color: #6c5ce7;
 }
 /* Styles pour les cartes de service d'urgence */
 .emergency-card {
@@ -527,4 +666,23 @@
 
 .feedback-section button:hover {
   background-color: #d35400;
+}
+.delete-button {
+  background-color: #e74c3c; /* Rouge pour indiquer une action critique */
+  color: white; /* Texte blanc pour contraste */
+  border: none; /* Pas de bordure */
+  padding: 8px 16px; /* Espacement interne */
+  font-size: 14px; /* Taille du texte */
+  font-weight: bold; /* Texte en gras */
+  border-radius: 5px; /* Coins arrondis */
+  cursor: pointer; /* Curseur en forme de main */
+  transition: background-color 0.3s ease; /* Animation fluide lors du survol */
+}
+
+.delete-button:hover {
+  background-color: #c0392b; /* Rouge plus foncé au survol */
+}
+
+.delete-button:active {
+  transform: scale(0.98); /* Légère réduction de taille lors du clic */
 }
