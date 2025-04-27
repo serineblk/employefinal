@@ -23,6 +23,8 @@ import {
   FaHome,
   FaChartBar, // Add this line
   FaCoins, 
+  FaComments,
+  
 } from "react-icons/fa";
 import profilereceptioniste from "../assets/profilereceptioniste.webp";
 
@@ -1562,6 +1564,121 @@ const Statistics = () => {
       
     </div>
   );
+  
+};
+// Composant pour la gestion des conversations (Réceptionniste <-> Administrateur)
+const Conversation = () => {
+  const [messages, setMessages] = useState([]);
+  const [newMessage, setNewMessage] = useState("");
+
+  const handleSendMessage = () => {
+    if (newMessage.trim()) {
+      const message = {
+        id: Date.now(),
+        sender: "Receptionist",
+        content: newMessage,
+        timestamp: new Date().toLocaleString(),
+      };
+      setMessages([...messages, message]);
+      setNewMessage("");
+      // Simuler une réponse automatique de l'administrateur après 2 secondes
+      setTimeout(() => {
+        const adminResponse = {
+          id: Date.now() + 1,
+          sender: "Admin",
+          content: "Votre message a été reçu. Nous traiterons cela rapidement.",
+          timestamp: new Date().toLocaleString(),
+        };
+        setMessages((prev) => [...prev, adminResponse]);
+      }, 2000);
+    }
+  };
+
+  return (
+    <div className="container conversation">
+      <h2>Conversation avec l'Administrateur</h2>
+      <div className="messages">
+        {messages.map((msg) => (
+          <div key={msg.id} className={`message ${msg.sender.toLowerCase()}`}>
+            <p><strong>{msg.sender}:</strong> {msg.content}</p>
+            <small>{msg.timestamp}</small>
+          </div>
+        ))}
+      </div>
+      <div className="message-input">
+        <input
+          type="text"
+          value={newMessage}
+          onChange={(e) => setNewMessage(e.target.value)}
+          placeholder="Écrivez votre message..."
+        />
+        <button onClick={handleSendMessage}>Envoyer</button>
+      </div>
+    </div>
+  );
+};
+
+// Composant pour gérer les approbations/refus des réservations (Administrateur)
+const AdminReservationApproval = () => {
+  const [reservations, setReservations] = useState([
+    { id: 1, guestName: "John Doe", room: "101", status: "En attente" },
+    { id: 2, guestName: "Jane Smith", room: "102", status: "En attente" },
+  ]);
+
+  const handleApprove = (id) => {
+    setReservations((prev) =>
+      prev.map((res) =>
+        res.id === id ? { ...res, status: "Approuvée" } : res
+      )
+    );
+  };
+
+  const handleReject = (id) => {
+    setReservations((prev) =>
+      prev.map((res) =>
+        res.id === id ? { ...res, status: "Rejetée" } : res
+      )
+    );
+  };
+
+  return (
+    <div className="container admin-reservation-approval">
+      <h2>Gestion des Réservations (Administrateur)</h2>
+      <table className="reservation-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Nom du Client</th>
+            <th>Chambre</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {reservations.map((res) => (
+            <tr key={res.id}>
+              <td>{res.id}</td>
+              <td>{res.guestName}</td>
+              <td>{res.room}</td>
+              <td>{res.status}</td>
+              <td>
+                {res.status === "En attente" && (
+                  <>
+                    <button className="btn approve" onClick={() => handleApprove(res.id)}>
+                      Approuver
+                    </button>
+                    <button className="btn reject" onClick={() => handleReject(res.id)}>
+                      Rejeter
+                    </button>
+                  </>
+                )}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
 };
 
 // Composant ReceptionistDashboard
@@ -1575,6 +1692,12 @@ const ReceptionistDashboard = () => {
       case "Tableau de Bord":
         navigate("/receptionist");
         break;
+        case "Conversation":
+          navigate("/receptionist/conversation");
+          break;
+        case "Gestion des Approbations":
+          navigate("/admin/approval");
+          break;
       case "Accueil Clients":
         navigate("/receptionist/welcome");
         break;
@@ -1618,6 +1741,7 @@ const ReceptionistDashboard = () => {
       <Sidebar
         buttons={[
           { name: "Tableau de Bord", icon: <FaHome /> },
+          { name: "Conversation", icon: <FaComments /> },
           { name: "Accueil Clients", icon: <FaUserCheck /> },
           { name: "Authentifier une Réservation", icon: <FaCheckCircle /> },
           { name: "Créer une Réservation", icon: <FaPlus /> },
@@ -1627,6 +1751,8 @@ const ReceptionistDashboard = () => {
           { name: "Gestion des Clients", icon: <FaUsers /> },
           { name: "Tâches Administratives", icon: <FaClipboardList /> },
           { name: "Statistiques", icon: <FaChartLine /> },
+          
+         
         ]}
         onButtonClick={handleButtonClick}
         activeButton={activeSection}
@@ -1634,12 +1760,10 @@ const ReceptionistDashboard = () => {
         dashboardName="Tableau de Bord Réceptionniste"
         profileImage={profilereceptioniste}
       />
-
       <div className="main-content">
         <header className="dashboard-header">
           <h1>{activeSection}</h1>
         </header>
-
         <Routes>
           <Route path="/" element={<HomeDashboard />} />
           <Route path="/welcome" element={<GuestWelcome />} />
@@ -1651,6 +1775,8 @@ const ReceptionistDashboard = () => {
           <Route path="/client-management" element={<ClientManagement />} />
           <Route path="/administrative" element={<AdministrativeTasks />} />
           <Route path="/statistics" element={<Statistics />} />
+          <Route path="/conversation" element={<Conversation />} />
+          
         </Routes>
       </div>
     </div>

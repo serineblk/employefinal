@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   FaMoneyCheckAlt,
@@ -31,20 +31,9 @@ const AccountingDashboard = () => {
   const navigate = useNavigate();
 
   // États pour les données
-  const [payments, setPayments] = useState([
-    { id: 1, client: "Client A", amount: 200, date: "2023-10-01", paymentMethod: "Carte bancaire" },
-    { id: 2, client: "Client B", amount: 300, date: "2023-10-02", paymentMethod: "Virement bancaire" },
-  ]);
-
-  const [invoices, setInvoices] = useState([
-    { id: 1, client: "Client A", amount: 200, date: "2023-10-01", status: "payé" },
-    { id: 2, client: "Client B", amount: 300, date: "2023-10-02", status: "en attente" },
-  ]);
-
-  const [taxPayments, setTaxPayments] = useState([
-    { id: 1, type: "TVA", amount: 1000, date: "2023-10-01", status: "payé" },
-    { id: 2, type: "Impôt sur les sociétés", amount: 5000, date: "2023-10-02", status: "en attente" },
-  ]);
+  const [payments, setPayments] = useState([]);
+  const [invoices, setInvoices] = useState([]);
+  const [taxPayments, setTaxPayments] = useState([]);
 
   // États pour les nouveaux éléments
   const [newPayment, setNewPayment] = useState({ client: "", amount: "", paymentMethod: "" });
@@ -55,79 +44,162 @@ const AccountingDashboard = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
 
+  // Fonctions pour charger les données depuis l'API
+  const loadPayments = async () => {
+    try {
+      const response = await fetch('/api/payments');
+      const data = await response.json();
+      setPayments(data);
+    } catch (error) {
+      console.error("Erreur lors du chargement des paiements:", error);
+    }
+  };
+
+  const loadInvoices = async () => {
+    try {
+      const response = await fetch('/api/invoices');
+      const data = await response.json();
+      setInvoices(data);
+    } catch (error) {
+      console.error("Erreur lors du chargement des factures:", error);
+    }
+  };
+
+  const loadTaxPayments = async () => {
+    try {
+      const response = await fetch('/api/tax_payments');
+      const data = await response.json();
+      setTaxPayments(data);
+    } catch (error) {
+      console.error("Erreur lors du chargement des taxes:", error);
+    }
+  };
+
+  useEffect(() => {
+    if (activeSection === "payments") {
+      loadPayments();
+    } else if (activeSection === "invoices") {
+      loadInvoices();
+    } else if (activeSection === "taxes") {
+      loadTaxPayments();
+    }
+  }, [activeSection]);
+
   // Fonctions pour ajouter des éléments
-  const addPayment = () => {
+  const addPayment = async () => {
     if (newPayment.client && newPayment.amount && newPayment.paymentMethod) {
-      const newPaymentEntry = {
-        id: payments.length + 1,
-        client: newPayment.client,
-        amount: parseFloat(newPayment.amount),
-        date: new Date().toISOString().split('T')[0],
-        paymentMethod: newPayment.paymentMethod,
-      };
-      setPayments([...payments, newPaymentEntry]);
-      setNewPayment({ client: "", amount: "", paymentMethod: "" });
+      try {
+        const response = await fetch('/api/payments', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(newPayment),
+        });
+        const data = await response.json();
+        setPayments([...payments, { ...newPayment, id: data.id }]);
+        setNewPayment({ client: "", amount: "", paymentMethod: "" });
+      } catch (error) {
+        console.error("Erreur lors de l'ajout d'un paiement:", error);
+      }
     } else {
       alert("Veuillez remplir tous les champs.");
     }
   };
 
-  const addInvoice = () => {
+  const addInvoice = async () => {
     if (newInvoice.client && newInvoice.amount) {
-      const newInvoiceEntry = {
-        id: invoices.length + 1,
-        client: newInvoice.client,
-        amount: parseFloat(newInvoice.amount),
-        date: new Date().toISOString().split('T')[0],
-        status: "en attente",
-      };
-      setInvoices([...invoices, newInvoiceEntry]);
-      setNewInvoice({ client: "", amount: "" });
+      try {
+        const response = await fetch('/api/invoices', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(newInvoice),
+        });
+        const data = await response.json();
+        setInvoices([...invoices, { ...newInvoice, id: data.id }]);
+        setNewInvoice({ client: "", amount: "" });
+      } catch (error) {
+        console.error("Erreur lors de l'ajout d'une facture:", error);
+      }
     } else {
       alert("Veuillez remplir tous les champs.");
     }
   };
 
-  const addTax = () => {
+  const addTax = async () => {
     if (newTax.type && newTax.amount) {
-      const newTaxEntry = {
-        id: taxPayments.length + 1,
-        type: newTax.type,
-        amount: parseFloat(newTax.amount),
-        date: new Date().toISOString().split('T')[0],
-        status: "en attente",
-      };
-      setTaxPayments([...taxPayments, newTaxEntry]);
-      setNewTax({ type: "", amount: "" });
+      try {
+        const response = await fetch('/api/tax_payments', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(newTax),
+        });
+        const data = await response.json();
+        setTaxPayments([...taxPayments, { ...newTax, id: data.id }]);
+        setNewTax({ type: "", amount: "" });
+      } catch (error) {
+        console.error("Erreur lors de l'ajout d'une taxe:", error);
+      }
     } else {
       alert("Veuillez remplir tous les champs.");
     }
   };
 
   // Fonctions pour supprimer des éléments
-  const deletePayment = (id) => {
-    setPayments(payments.filter(payment => payment.id !== id));
+  const deletePayment = async (id) => {
+    try {
+      await fetch(`/api/payments/${id}`, { method: 'DELETE' });
+      setPayments(payments.filter(payment => payment.id !== id));
+    } catch (error) {
+      console.error("Erreur lors de la suppression d'un paiement:", error);
+    }
   };
 
-  const deleteInvoice = (id) => {
-    setInvoices(invoices.filter(invoice => invoice.id !== id));
+  const deleteInvoice = async (id) => {
+    try {
+      await fetch(`/api/invoices/${id}`, { method: 'DELETE' });
+      setInvoices(invoices.filter(invoice => invoice.id !== id));
+    } catch (error) {
+      console.error("Erreur lors de la suppression d'une facture:", error);
+    }
   };
 
-  const deleteTax = (id) => {
-    setTaxPayments(taxPayments.filter(tax => tax.id !== id));
+  const deleteTax = async (id) => {
+    try {
+      await fetch(`/api/tax_payments/${id}`, { method: 'DELETE' });
+      setTaxPayments(taxPayments.filter(tax => tax.id !== id));
+    } catch (error) {
+      console.error("Erreur lors de la suppression d'une taxe:", error);
+    }
   };
 
   // Fonctions pour mettre à jour les statuts
-  const updateInvoiceStatus = (id, newStatus) => {
-    setInvoices(invoices.map(invoice => 
-      invoice.id === id ? { ...invoice, status: newStatus } : invoice
-    ));
+  const updateInvoiceStatus = async (id, newStatus) => {
+    try {
+      await fetch(`/api/invoices/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: newStatus }),
+      });
+      setInvoices(invoices.map(invoice => 
+        invoice.id === id ? { ...invoice, status: newStatus } : invoice
+      ));
+    } catch (error) {
+      console.error("Erreur lors de la mise à jour du statut d'une facture:", error);
+    }
   };
 
-  const updateTaxStatus = (id, newStatus) => {
-    setTaxPayments(taxPayments.map(tax => 
-      tax.id === id ? { ...tax, status: newStatus } : tax
-    ));
+  const updateTaxStatus = async (id, newStatus) => {
+    try {
+      await fetch(`/api/tax_payments/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: newStatus }),
+      });
+      setTaxPayments(taxPayments.map(tax => 
+        tax.id === id ? { ...tax, status: newStatus } : tax
+      ));
+    } catch (error) {
+      console.error("Erreur lors de la mise à jour du statut d'une taxe:", error);
+    }
   };
 
   // Fonction de recherche
@@ -148,9 +220,10 @@ const AccountingDashboard = () => {
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement("a");
     link.setAttribute("href", encodedUri);
-    link.setAttribute("download", `${fileName}.csv`);
+       link.setAttribute("download", `${fileName}.csv`);
     document.body.appendChild(link);
     link.click();
+    document.body.removeChild(link);
   };
 
   // Fonction de déconnexion
@@ -348,7 +421,6 @@ const InvoiceSection = ({
 }) => (
   <section className="section">
     <h2 className="heading">Factures</h2>
-    
     <table className="table">
       <thead>
         <tr>
@@ -417,6 +489,11 @@ const InvoiceSection = ({
         <FaPlus /> Ajouter une facture
       </button>
     </div>
+    <div className="export-button">
+      <button className="button" onClick={handleExport}>
+        <FaFileExport /> Exporter en CSV
+      </button>
+    </div>
   </section>
 );
 
@@ -435,7 +512,6 @@ const TaxSection = ({
 }) => (
   <section className="section">
     <h2 className="heading">Taxes</h2>
-    
     <table className="table">
       <thead>
         <tr>
@@ -451,60 +527,64 @@ const TaxSection = ({
           <tr key={tax.id}>
             <td>{tax.type}</td>
             <td>{tax.amount} €</td>
-            <td>{tax.date}</td>
-            <td>
-              <select
-                value={tax.status}
-                onChange={(e) => updateTaxStatus(tax.id, e.target.value)}
-                className="input"
-              >
-                {STATUS_OPTIONS.map((status, index) => (
-                  <option key={index} value={status}>
-                    {status}
-                  </option>
-                ))}
-              </select>
-            </td>
-            <td>
-              <button className="button danger" onClick={() => deleteTax(tax.id)}>
-                <FaTrash /> Supprimer
-              </button>
-            </td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
-    <div className="pagination">
-      {Array.from({ length: totalPages }, (_, i) => (
-        <button
-          key={i + 1}
-          onClick={() => setCurrentPage(i + 1)}
-          className={currentPage === i + 1 ? "active" : ""}
-        >
-          {i + 1}
-        </button>
-      ))}
-    </div>
-    <div className="form">
-      <input
-        type="text"
-        placeholder="Type de taxe"
-        value={newTax.type}
-        onChange={(e) => setNewTax({ ...newTax, type: e.target.value })}
-        className="input"
-      />
-      <input
-        type="number"
-        placeholder="Montant"
-        value={newTax.amount}
-        onChange={(e) => setNewTax({ ...newTax, amount: e.target.value })}
-        className="input"
-      />
-      <button className="button" onClick={addTax}>
-        <FaPlus /> Ajouter une taxe
-      </button>
-    </div>
+<td>{tax.date}</td>
+<td>
+<select
+value={tax.status}
+onChange={(e) => updateTaxStatus(tax.id, e.target.value)}
+className="input"
+>
+{STATUS_OPTIONS.map((status, index) => (
+<option key={index} value={status}>
+{status}
+</option>
+))}
+</select>
+</td>
+<td>
+<button className="button danger" onClick={() => deleteTax(tax.id)}>
+<FaTrash /> Supprimer
+</button>
+</td>
+</tr>
+))}
+</tbody>
+</table>
+<div className="pagination">
+{Array.from({ length: totalPages }, (_, i) => (
+<button
+key={i + 1}
+onClick={() => setCurrentPage(i + 1)}
+className={currentPage === i + 1 ? "active" : ""}
+>
+{i + 1}
+</button>
+))}
+</div>
+<div className="form">
+<input
+type="text"
+placeholder="Type de taxe"
+value={newTax.type}
+onChange={(e) => setNewTax({ ...newTax, type: e.target.value })}
+className="input"
+/>
+<input
+type="number"
+placeholder="Montant"
+value={newTax.amount}
+onChange={(e) => setNewTax({ ...newTax, amount: e.target.value })}
+className="input"
+/>
+<button className="button" onClick={addTax}>
+<FaPlus /> Ajouter une taxe
+</button>
+</div>
+<div className="export-button">
+<button className="button" onClick={handleExport}>
+<FaFileExport /> Exporter en CSV
+</button>
+</div>
   </section>
 );
-
 export default AccountingDashboard;

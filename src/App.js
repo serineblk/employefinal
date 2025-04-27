@@ -19,7 +19,7 @@ const App = () => {
 
         {/* Tableaux de bord */}
         <Route path="/accounting" element={<AccountingDashboard />} /> {/* Comptabilité */}
-        <Route path="/housekeeping" element={<HousekeepingDashboard />} /> {/* Personnel de ménage */}
+        <Route path="/housekeeping" element={<HousekeepingDashboard />} />{/* Personnel de ménage */}
         <Route path="/receptionist/*" element={<ReceptionistDashboard />} /> {/* Réceptionniste */}
 
         {/* Pages des services */}

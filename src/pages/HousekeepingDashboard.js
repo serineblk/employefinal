@@ -1,4 +1,7 @@
-import React, { useState } from "react";
+// HousekeepingDashboard.js
+
+import React, { useState, useEffect } from "react";
+import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import Sidebar from "../components/Sidebar";
 import { FaTasks, FaClipboardList, FaShoppingCart, FaUserCheck, FaCheck, FaPlus } from "react-icons/fa";
@@ -8,84 +11,105 @@ import "../Style/housekeeping.css";
 const HousekeepingDashboard = () => {
   const navigate = useNavigate();
   const [activeButton, setActiveButton] = useState("Tâches de Ménage");
-  const [showSuccessMessage, setShowSuccessMessage] = useState(false);
-  const [tasks, setTasks] = useState([
-    { id: 1, room: "101", status: "à nettoyer" },
-    { id: 2, room: "102", status: "en maintenance" },
-    { id: 3, room: "103", status: "utilisé" },
-  ]);
-  const [specialRequests, setSpecialRequests] = useState([
-    { id: 1, room: "101", request: "Nettoyage urgent", status: "en attente" },
-  ]);
+  const [tasks, setTasks] = useState([]);
+  const [specialRequests, setSpecialRequests] = useState([]);
   const [inventoryOrders, setInventoryOrders] = useState([]);
-  const [staff, setStaff] = useState([
-    { id: 1, name: "Jean Dupont", status: "présent", performance: 8 },
-    { id: 2, name: "Marie Curie", status: "absent", performance: 7 },
-  ]);
+  const [staff, setStaff] = useState([]);
   const [newTask, setNewTask] = useState({ room: "", status: "" });
   const [newRequest, setNewRequest] = useState({ room: "", request: "" });
-  const [newOrder, setNewOrder] = useState({ product: "", quantity: "" });
+  const [newOrder, setNewOrder] = useState({ product: "", quantity: "", date: "" });
   const [newEmployee, setNewEmployee] = useState({ name: "", status: "", performance: "" });
 
-  const updateTaskStatus = (taskId, newStatus) => {
+  useEffect(() => {
+  
+    
+    const fetchTasks = async () => {
+      try {
+        
+        const response = await axios.get('/api/housekeeping/tasks');
+        setTasks(response.data);
+      } catch (error) {
+        console.error('Error fetching tasks:', error);
+        setTasks([]); // Fallback: initialise avec un tableau vide
+      }
+    };
+  
+    const fetchSpecialRequests = async () => {
+      try {
+        const response = await axios.get('/api/special-requests/requests');
+        setSpecialRequests(response.data);
+      } catch (error) {
+        console.error('Error fetching special requests:', error);
+        setSpecialRequests([]);
+      }
+    };
+  
+    const fetchInventoryOrders = async () => {
+      try {
+        const response = await axios.get('/api/inventory/orders');
+        setInventoryOrders(response.data);
+      } catch (error) {
+        console.error('Error fetching inventory orders:', error);
+        setInventoryOrders([]);
+      }
+    };
+  
+    const fetchStaff = async () => {
+      try {
+        const response = await axios.get('/api/staff/staff');
+        setStaff(response.data);
+      } catch (error) {
+        console.error('Error fetching staff:', error);
+        setStaff([]);
+      }
+    };
+  
+    fetchTasks();
+    fetchSpecialRequests();
+    fetchInventoryOrders();
+    fetchStaff();
+  }, []);
+
+  const updateTaskStatus = async (taskId, newStatus) => {
+    await axios.put(`/api/housekeeping/tasks/${taskId}`, { status: newStatus });
+
     setTasks(tasks.map(task => task.id === taskId ? { ...task, status: newStatus } : task));
   };
 
-  const addTask = () => {
+  const addTask = async () => {
     if (newTask.room && newTask.status) {
-      const newTaskEntry = {
-        id: tasks.length + 1,
-        room: newTask.room,
-        status: newTask.status,
-      };
-      setTasks([...tasks, newTaskEntry]);
+      await axios.post('/api/housekeeping/tasks', newTask);
+      setTasks([...tasks, { ...newTask, id: tasks.length + 1 }]);
       setNewTask({ room: "", status: "" });
     } else {
       alert("Veuillez remplir tous les champs.");
     }
   };
 
-  const addSpecialRequest = () => {
+  const addSpecialRequest = async () => {
     if (newRequest.room && newRequest.request) {
-      const newRequestEntry = {
-        id: specialRequests.length + 1,
-        room: newRequest.room,
-        request: newRequest.request,
-        status: "en attente",
-      };
-      setSpecialRequests([...specialRequests, newRequestEntry]);
+      await axios.post('/api/special-requests/requests', newRequest);
+      setSpecialRequests([...specialRequests, { ...newRequest, id: specialRequests.length + 1 }]);
       setNewRequest({ room: "", request: "" });
     } else {
       alert("Veuillez remplir tous les champs.");
     }
   };
 
-  const addInventoryOrder = () => {
-    if (newOrder.product && newOrder.quantity) {
-      const newOrderEntry = {
-        id: inventoryOrders.length + 1,
-        product: newOrder.product,
-        quantity: newOrder.quantity,
-        date: new Date().toISOString().split('T')[0],
-      };
-      setInventoryOrders([...inventoryOrders, newOrderEntry]);
-      setNewOrder({ product: "", quantity: "" });
-      setShowSuccessMessage(true);
-      setTimeout(() => setShowSuccessMessage(false), 3000);
+  const addInventoryOrder = async () => {
+    if (newOrder.product && newOrder.quantity && newOrder.date) {
+      await axios.post('/api/inventory/orders', newOrder);
+      setInventoryOrders([...inventoryOrders, { ...newOrder, id: inventoryOrders.length + 1 }]);
+      setNewOrder({ product: "", quantity: "", date: "" });
     } else {
       alert("Veuillez remplir tous les champs.");
     }
   };
 
-  const addEmployee = () => {
+  const addEmployee = async () => {
     if (newEmployee.name && newEmployee.status && newEmployee.performance) {
-      const newEmployeeEntry = {
-        id: staff.length + 1,
-        name: newEmployee.name,
-        status: newEmployee.status,
-        performance: parseFloat(newEmployee.performance),
-      };
-      setStaff([...staff, newEmployeeEntry]);
+      await axios.post('/api/staff/staff', newEmployee);
+      setStaff([...staff, { ...newEmployee, id: staff.length + 1 }]);
       setNewEmployee({ name: "", status: "", performance: "" });
     } else {
       alert("Veuillez remplir tous les champs.");
@@ -101,7 +125,7 @@ const HousekeepingDashboard = () => {
 
   const handleLogout = () => {
     alert("Déconnexion réussie !");
-    navigate("/"); // Rediriger vers la page d'accueil
+    navigate("/");
   };
 
   return (
@@ -211,7 +235,6 @@ const HousekeepingDashboard = () => {
         {activeButton === "Commande des Produits" && (
           <section className="section">
             <h2 className="heading">Commande des Produits</h2>
-            {showSuccessMessage && <p className="successMessage">Commande envoyée avec succès !</p>}
             <table className="table">
               <thead>
                 <tr>
@@ -245,8 +268,15 @@ const HousekeepingDashboard = () => {
                 onChange={(e) => setNewOrder({ ...newOrder, quantity: e.target.value })}
                 className="input"
               />
+              <input
+                type="date"
+                placeholder="Date"
+                value={newOrder.date}
+                onChange={(e) => setNewOrder({ ...newOrder, date: e.target.value })}
+                className="input"
+              />
               <button className="button" onClick={addInventoryOrder}>
-                <FaPlus /> Envoyer la commande
+                <FaPlus /> Ajouter une commande
               </button>
             </div>
           </section>
